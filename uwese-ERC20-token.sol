@@ -5,50 +5,6 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contr
 
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract Minter {
-    
-    address minter;
-    uint public creationTime = block.timestamp;
-    error Unauthorized();
-    error TooEarly();
-    error NotEnoughEther();
-    
-    constructor() public {
-        minter = msg.sender;
-    }
-    
-    
-    modifier costs(uint price){
-        if(msg.value < price){
-            revert NotEnoughEther();
-            
-            _;
-            
-            if(msg.value > price){
-                payable(msg.sender).transfer(msg.value - price);
-            }
-        }
-    }
-    
-    
-    modifier onlyBy(address _account) {
-        //require(msg.sender == _account, 'Sender not authorized');
-        //_;
-        if (msg.sender != _account)
-            revert Unauthorized();
-        _;
-        
-    }
-    
-    modifier onlyAfter(uint _time){
-        if(block.timestamp < _time){
-            revert TooEarly();
-            
-            _;
-        }
-    }
-}
-
 contract UweseCoin is Minter, IERC20{
     
     String public symbol;
@@ -59,11 +15,7 @@ contract UweseCoin is Minter, IERC20{
     //address public minter;
     mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) allowed;
-
     
-    // // address of contributors
-    // address[] funders;
-    // uint public contributedAmount;
     
     event Sent(address from, address to, uint amount);
     
