@@ -1,32 +1,9 @@
 pragma solidity >= 0.7.0 < 0.9.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contracts/math/SafeMath.sol";
 
-//Safe Math Interface
- 
-contract SafeMath {
- 
-    function safeAdd(uint a, uint b) public pure returns (uint c) {
-        c = a + b;
-        require(c >= a);
-    }
- 
-    function safeSub(uint a, uint b) public pure returns (uint c) {
-        require(b <= a);
-        c = a - b;
-    }
- 
-    function safeMul(uint a, uint b) public pure returns (uint c) {
-        c = a * b;
-        require(a == 0 || c / a == b);
-    }
- 
-    function safeDiv(uint a, uint b) public pure returns (uint c) {
-        require(b > 0);
-        c = a / b;
-    }
-}
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
 contract Minter {
     
@@ -110,7 +87,10 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
     }
     
     // Transfer the balance from token owner's account to receiver's account
+    // check if the total supply has the amount of token which needs to be allocated to a user.
     function transfer(address to, uint tokens) public returns(bool success){
+        require(tokens <= _balances[msg.sender]);
+        require(to != address(0));
         balances[msg.sender] = safeSub(balances[msg.sender], tokens );
         balances[to] = safeAdd(balances[to], tokens);
         
@@ -127,6 +107,7 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
     }
     
      // Transfer tokens from the from account to the to account
+     // Function transferFrom will facilitate the transfer of token between users
     function transferFrom(address from, address to, tokens) public returns(bool success){
         balances[from] = safeSub(balances[from], tokens);
         allowed[from][msg.sender] = safeSub(allowed[from][msg.sender], tokens);
@@ -135,11 +116,13 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
         return true;
     }
     
-    
+    // This function will check if a user has enough balance to perform the transfer to another user.
     function allowance(address tokenOwner, address tokenSpender) public returns(bool success){
         return allowed[tokenOwner] [tokenSpender];
         
     }
+    
+
     
     
     function mint(address receiver, uint amount) public onlyBy(minter){
@@ -183,5 +166,10 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
         if(uint160 (minter) & 0 == 1){
             return;
         }
+    }
+    
+    
+    fallback () public payable {
+        revert();
     }
 }
