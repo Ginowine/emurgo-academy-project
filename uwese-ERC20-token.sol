@@ -49,12 +49,12 @@ contract Minter {
     }
 }
 
-contract UweseCoin is Minter, ERC20Interface, SafeMath{
+contract UweseCoin is Minter, IERC20{
     
     String public symbol;
     String public name;
     uint8 public decimals;
-    uint public _totalSupply;
+    uint public totalSupply;
     
     //address public minter;
     mapping(address => uint) public balances;
@@ -71,10 +71,10 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
         symbol = "UWA";
         name = "Uwese Coin";
         decimals = 18;
-        _totalSupply = 100000;
+        totalSupply = 100000;
         
-        balances[0x5B38Da6a701c568545dCfcB03FcB875f56beddC4] = _totalSupply;
-        emit Transfer(address(0), 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, _totalSupply);
+        balances[0x5B38Da6a701c568545dCfcB03FcB875f56beddC4] = totalSupply;
+        emit Transfer(address(0), 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, totalSupply);
     }
     
     // Total supply of Tokens
@@ -91,16 +91,17 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
     function transfer(address to, uint tokens) public returns(bool success){
         require(tokens <= _balances[msg.sender]);
         require(to != address(0));
-        balances[msg.sender] = safeSub(balances[msg.sender], tokens );
-        balances[to] = safeAdd(balances[to], tokens);
-        
+        balances[msg.sender] = balances[msg.sender].sub(tokens);
+        balances[to] = balances[to].add(tokens);
         emit Transfer(msg.sender, to, tokens);
-        
         return true;
+        
     } 
     
     
+    // Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
     function approve(address spender, uint tokens) public returns(bool success){
+        require(spender != address(0));
         allowed[msg.sender] [spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
@@ -109,26 +110,42 @@ contract UweseCoin is Minter, ERC20Interface, SafeMath{
      // Transfer tokens from the from account to the to account
      // Function transferFrom will facilitate the transfer of token between users
     function transferFrom(address from, address to, tokens) public returns(bool success){
-        balances[from] = safeSub(balances[from], tokens);
-        allowed[from][msg.sender] = safeSub(allowed[from][msg.sender], tokens);
-        balances[to] = safeAdd(balances[to], tokens);
+        require(tokens <= balances[from]);
+        require(tokens <= allowed[from][msg.sender]);
+        require(to != address(0));
+        
+        balances[from] = balances[from].sub(tokens);
+        balances[to] = balances[to].add(tokens);
+        allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
         emit Transfer(from, to, tokens);
         return true;
     }
     
-    // This function will check if a user has enough balance to perform the transfer to another user.
-    function allowance(address tokenOwner, address tokenSpender) public returns(bool success){
-        return allowed[tokenOwner] [tokenSpender];
+    // Function to check the amount of tokens that an owner allowed to a spender.
+    function allowance(address owner, address spender)public view returns (uint256){
+        return allowed[owner][spender];
+    }
+    
+    
+    // Internal function that mints an amount of the token and assigns it to an account.
+    function mint(address receiver, uint amount) internal{
+        require(account != 0);
+        totalSupply = totalSupply.add(amount);
+        balances[receiver] = balances[receiver].add(amount);
         
+        emit Transfer(address(0), receiver, amount);
     }
     
+    
+    // Internal function that burns an amount of the token of a given account.
+    function burn(address account, uint256 amount) internal {
+        require(account != 0);
+        require(amount <= balances[account]);
 
-    
-    
-    function mint(address receiver, uint amount) public onlyBy(minter){
-        //require(msg.sender == minter);
-        balance[receiver] += amount;
-    }
+        totalSupply = totalSupply.sub(amount);
+        balances[account] = balances[account].sub(amount);
+        emit Transfer(account, address(0), amount);
+  }
     
     error insufficientBalance(uint requested, uint available);
     
