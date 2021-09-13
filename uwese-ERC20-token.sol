@@ -97,12 +97,50 @@ contract UweseCoin is Minter, ERC20{
         _totalSupply = 100000;
         
         balances[0x5B38Da6a701c568545dCfcB03FcB875f56beddC4] = _totalSupply;
-        emit transfer(address(0), 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, _totalSupply);
+        emit Transfer(address(0), 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, _totalSupply);
     }
     
+    // Total supply of Tokens
     function totalSupply() public view returns(uint){
         return totalSupply - balances[address(0)];
     }
+    
+    function balanceOf(address tokenOwner) public view returns(uint balance){
+        return balances[tokenOwner];
+    }
+    
+    // Transfer the balance from token owner's account to receiver's account
+    function transfer(address to, uint tokens) public returns(bool success){
+        balances[msg.sender] = safeSub(balances[msg.sender], tokens );
+        balances[to] = safeAdd(balances[to], tokens);
+        
+        emit Transfer(msg.sender, to, tokens);
+        
+        return true;
+    } 
+    
+    
+    function approve(address spender, uint tokens) public returns(bool success){
+        allowed[msg.sender] [spender] = tokens;
+        emit Approval(msg.sender, spender, tokens);
+        return true;
+    }
+    
+     // Transfer tokens from the from account to the to account
+    function transferFrom(address from, address to, tokens) public returns(bool success){
+        balances[from] = safeSub(balances[from], tokens);
+        allowed[from][msg.sender] = safeSub(allowed[from][msg.sender], tokens);
+        balances[to] = safeAdd(balances[to], tokens);
+        emit Transfer(from, to, tokens);
+        return true;
+    }
+    
+    
+    function allowance(address tokenOwner, address tokenSpender) public returns(bool success){
+        return allowed[tokenOwner] [tokenSpender];
+        
+    }
+    
     
     function mint(address receiver, uint amount) public onlyBy(minter){
         //require(msg.sender == minter);
