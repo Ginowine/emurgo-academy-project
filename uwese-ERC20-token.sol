@@ -1,8 +1,6 @@
-IMPROVED VERSION OF MY TOKEN
-
 pragma solidity >= 0.7.0 < 0.9.0;
 
-
+// IMPROVED VERSION OF MY TOKEN
 contract UweseCoin {
     
     address public minter;
