@@ -72,7 +72,7 @@ contract Minter {
     }
 }
 
-contract UweseCoin is Minter, ERC20{
+contract UweseCoin is Minter, ERC20Interface, SafeMath{
     
     String public symbol;
     String public name;
