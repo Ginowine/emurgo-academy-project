@@ -5,7 +5,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contr
 
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract UweseCoin is Minter, IERC20{
+contract UweseCoin is IERC20{
     
     String public symbol;
     String public name;
@@ -25,8 +25,8 @@ contract UweseCoin is Minter, IERC20{
         decimals = 18;
         totalSupply = 100000;
         
-        balances[0x5B38Da6a701c568545dCfcB03FcB875f56beddC4] = totalSupply;
-        emit Transfer(address(0), 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, totalSupply);
+        balances[msg.sender] = totalSupply;
+        //emit Transfer(address(0), msg.sender, totalSupply);
     }
     
     // Total supply of Tokens
@@ -49,7 +49,6 @@ contract UweseCoin is Minter, IERC20{
         return true;
         
     } 
-    
     
     // Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
     function approve(address spender, uint tokens) public returns(bool success){
