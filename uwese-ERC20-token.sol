@@ -5,7 +5,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contr
 
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract UweseCoin is IERC20{
+contract UweseCoin is Ownable, IERC20{
     
     String public symbol;
     String public name;
