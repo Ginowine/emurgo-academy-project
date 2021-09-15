@@ -2,15 +2,19 @@ pragma solidity >= 0.7.0 < 0.9.0;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol";
 
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract UweseCoin is Ownable, IERC20{
+contract UweseCoin is IERC20, AccessControl{
     
     String public symbol;
     String public name;
     uint8 public decimals;
     uint public totalSupply;
+    
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     
     //address public minter;
     mapping(address => uint) public balances;
@@ -19,13 +23,15 @@ contract UweseCoin is Ownable, IERC20{
     
     event Sent(address from, address to, uint amount);
     
-    constructor()public{
+    constructor(address minter, address burner)public{
         symbol = "UWA";
         name = "Uwese Coin";
         decimals = 18;
         totalSupply = 100000;
         
         balances[msg.sender] = totalSupply;
+        _setupRole(MINTER_ROLE, minter);
+        _setupRole(BURNER_ROLE, burner);
         //emit Transfer(address(0), msg.sender, totalSupply);
     }
     
@@ -81,6 +87,7 @@ contract UweseCoin is Ownable, IERC20{
     // Internal function that mints an amount of the token and assigns it to an account.
     function mint(address receiver, uint amount) internal{
         require(account != 0);
+        require(hasRole(MINTER_ROLE, msg.sender), "Caller is not a minter");
         totalSupply = totalSupply.add(amount);
         balances[receiver] = balances[receiver].add(amount);
         
@@ -92,6 +99,7 @@ contract UweseCoin is Ownable, IERC20{
     function burn(address account, uint256 amount) internal {
         require(account != 0);
         require(amount <= balances[account]);
+        require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
 
         totalSupply = totalSupply.sub(amount);
         balances[account] = balances[account].sub(amount);
