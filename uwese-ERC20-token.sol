@@ -30,8 +30,8 @@ contract UweseCoin is IERC20, AccessControl{
         totalSupply = 100000;
         
         balances[msg.sender] = totalSupply;
-        _setupRole(MINTER_ROLE, minter);
-        _setupRole(BURNER_ROLE, burner);
+        _grantRole(MINTER_ROLE, minter);
+        _grantRole(BURNER_ROLE, burner);
         //emit Transfer(address(0), msg.sender, totalSupply);
     }
     
