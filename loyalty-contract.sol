@@ -11,43 +11,41 @@ contract UweseLoyaltyProgram is UweseCoin {
 	}
 	
 	
-	// Customer information
+	// A struct complex data type holding Customer information
 	struct Customer{
 	    address customerAddress;
 	    string firstName;
 	    string lastName;
 	    string emailAddress;
 	    bool isRegistered;
+	    // data type to check if customer is using a business
 	    mapping(address => bool) business;
 	    
 	}
 	
 	
-	// business information
+	// A struct comples data type holding Business information
 	struct Business {
         address busAddress;
         string name;
         string email;
         bool isReg;
-        UweseCoin uwese; //crypto token of the business
-        mapping(address => bool) cust;//Check if customer is part of the loyalty program of the business
-        mapping(address => bool) bus;//Check if business has an arrangement with other businesses
-        mapping(address => uint256) rate;//Rate of exchange between the two crypto-tokens
+        //crypto token of the business
+        UweseCoin uwese; 
+        //Check if customer is part of the loyalty program of the business
+        mapping(address => bool) cust;
+        //Check if business has an arrangement with other businesses
+        mapping(address => bool) bus;
+        //Rate of exchange between the two crypto-tokens
+        mapping(address => uint256) rate;
 	}
 	
-	//each address is mapped to a specific customer or business
+	//mapping an address to a customer and mapping an address to a Business
 	mapping(address => Customer) public customers;
 	mapping(address => Business) public businesses;
 	
-	   	/**
-     * @dev Registers a new business
-     * @param _bName  name of business
-     * @param _email email of business
-     * @param _bAd Address business
-     * @param _symbol of crypto token
-     * @param _decimal precision of token
-     */
 
+    // This function registers a business to the loyalty platform
 	function regBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol, uint8 _decimal, uint totalSupply) public {
 		require(msg.sender == owner);
 		require(!customers[_bAd].isReg, "Customer Registered");
@@ -58,14 +56,8 @@ contract UweseLoyaltyProgram is UweseCoin {
 
 	}
 	
-		    /**
-     * @dev Registers a new customer
-     * @param _firstName first name of customer
-     * @param _lastName last name of customer
-     * @param _email email of customer
-     * @param _cAd address of customer
-     */
-  
+    
+    // This function registers a customer to the loyalty program
 	function regCustomer(string memory _firstName, string memory _lastName, string memory _email, address _cAd) public {
 		require(msg.sender == owner);
 		require(!customers[_cAd].isReg, "Customer Registered");
