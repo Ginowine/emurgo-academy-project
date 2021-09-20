@@ -3,7 +3,7 @@ pragma solidity >= 0.7.0 < 0.9.0;
 import "./uwese-coin.sol";
 
 
-contract registerForLoyaltyProgram {
+contract UweseLoyaltyProgram is UweseCoin {
     address private owner;
 
 	constructor() public {
@@ -29,7 +29,7 @@ contract registerForLoyaltyProgram {
         string name;
         string email;
         bool isReg;
-        uwese-coin uwese; //crypto token of the business
+        UweseCoin uwese; //crypto token of the business
         mapping(address => bool) cust;//Check if customer is part of the loyalty program of the business
         mapping(address => bool) bus;//Check if business has an arrangement with other businesses
         mapping(address => uint256) rate;//Rate of exchange between the two crypto-tokens
@@ -52,7 +52,7 @@ contract registerForLoyaltyProgram {
 		require(msg.sender == owner);
 		require(!customers[_bAd].isReg, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
-		uwese-coin uweseCoin = new uwese-coin(_bAd, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
+		uweseCoin uweseCoin = new uwese-coin(_bAd, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
 		businesses[_bAd] = Business(_bAd, _bName , _email, true, uweseCoin);//creates new business
 		businesses[_bAd].uweseCoin.mint(_bAd, 10000);//gives tokens for the business
 
