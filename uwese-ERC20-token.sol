@@ -6,7 +6,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract UweseCoin is IERC20, AccessControl{
+contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
     
     String public symbol;
     String public name;
@@ -23,7 +23,7 @@ contract UweseCoin is IERC20, AccessControl{
     
     event Sent(address from, address to, uint amount);
     
-    constructor(address minter, address burner)public{
+    constructor(address minter, address burner) public{
         symbol = "UWA";
         name = "Uwese Coin";
         decimals = 18;
@@ -41,6 +41,7 @@ contract UweseCoin is IERC20, AccessControl{
         return totalSupply - balances[address(0)];
     }
     
+    // 
     function balanceOf(address tokenOwner) public view returns(uint balance){
         return balances[tokenOwner];
     }
@@ -135,7 +136,6 @@ contract UweseCoin is IERC20, AccessControl{
 
     }
     
-
     function forceMinterChange(address newMinter) public payable costs(200 ether){
         minter = newMinter;
         
