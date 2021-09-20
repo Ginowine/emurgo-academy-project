@@ -5,6 +5,8 @@ import "./uwese-coin.sol";
 
 contract UweseLoyaltyProgram is UweseCoin {
     address private owner;
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
 	constructor() public {
 		owner = msg.sender;
@@ -45,12 +47,12 @@ contract UweseLoyaltyProgram is UweseCoin {
 	mapping(address => Business) public businesses;
 	
 
-    // This function registers a business to the loyalty platform
-	function regBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol, uint8 _decimal, uint totalSupply) public {
+    // This function registers a business to the loyalty platform and they are able to create their tokens
+	function regBusiness(bytes32 _minter, bytes32 _burner, string memory _bName, string memory _email, address _bAd, string memory _symbol, uint8 _decimal, uint totalSupply) public {
 		require(msg.sender == owner);
 		require(!customers[_bAd].isReg, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
-		uweseCoin uweseCoin = new uwese-coin(_bAd, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
+		UweseCoin uweseCoin = new UweseCoin(_minter, _burner, _bAd, _email, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
 		businesses[_bAd] = Business(_bAd, _bName , _email, true, uweseCoin);//creates new business
 		businesses[_bAd].uweseCoin.mint(_bAd, 10000);//gives tokens for the business
 

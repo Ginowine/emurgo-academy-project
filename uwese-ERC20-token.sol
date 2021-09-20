@@ -12,6 +12,7 @@ contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
     string public symbol;
     string public name;
     uint8 public decimals;
+    string public emailAddress;
     uint public totalSupply;
     
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -24,11 +25,12 @@ contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
     
     event Sent(address from, address to, uint amount);
     
-    constructor(address minter, address burner, address _businessAddress, string memory _symbol, string memory _name, uint8 _decimal, uint _totalSupply) public{
+    constructor(address minter, address burner, address _businessAddress, string memory _email, string memory _symbol, string memory _name, uint8 _decimal, uint _totalSupply) public{
         
         owner = _businessAddress;
         symbol = _symbol;
         name = _name;
+        emailAddress = _email;
         decimals = _decimal;
         totalSupply = _totalSupply;
         
