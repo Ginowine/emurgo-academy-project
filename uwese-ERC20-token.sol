@@ -1,152 +1,146 @@
 pragma solidity >= 0.7.0 < 0.9.0;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.0/contracts/math/SafeMath.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol";
+import "./uwese-coin.sol";
 
-//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/ERC20.sol";
 
-contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
-    
-    String public symbol;
-    String public name;
-    uint8 public decimals;
-    uint public totalSupply;
-    
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    
-    //address public minter;
-    mapping(address => uint) public balances;
-    mapping(address => mapping(address => uint)) allowed;
-    
-    
-    event Sent(address from, address to, uint amount);
-    
-    constructor(address minter, address burner) public{
-        symbol = "UWA";
-        name = "Uwese Coin";
-        decimals = 18;
-        totalSupply = 100000;
-        
-        balances[msg.sender] = totalSupply;
-        _grantRole(MINTER_ROLE, minter);
-        _grantRole(BURNER_ROLE, burner);
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        //emit Transfer(address(0), msg.sender, totalSupply);
-    }
-    
-    // Total supply of Tokens
-    function totalSupply() public view returns(uint){
-        return totalSupply - balances[address(0)];
-    }
-    
-    // 
-    function balanceOf(address tokenOwner) public view returns(uint balance){
-        return balances[tokenOwner];
-    }
-    
-    // Transfer the balance from token owner's account to receiver's account
-    // check if the total supply has the amount of token which needs to be allocated to a user.
-    function transfer(address to, uint tokens) public returns(bool success){
-        require(tokens <= _balances[msg.sender]);
-        require(to != address(0));
-        balances[msg.sender] = balances[msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        emit Transfer(msg.sender, to, tokens);
-        return true;
-        
-    } 
-    
-    // Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-    function approve(address spender, uint tokens) public returns(bool success){
-        require(spender != address(0));
-        allowed[msg.sender] [spender] = tokens;
-        emit Approval(msg.sender, spender, tokens);
-        return true;
-    }
-    
-     // Transfer tokens from the from account to the to account
-     // Function transferFrom will facilitate the transfer of token between users
-    function transferFrom(address from, address to, tokens) public returns(bool success){
-        require(tokens <= balances[from]);
-        require(tokens <= allowed[from][msg.sender]);
-        require(to != address(0));
-        
-        balances[from] = balances[from].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
-        emit Transfer(from, to, tokens);
-        return true;
-    }
-    
-    // Function to check the amount of tokens that an owner allowed to a spender.
-    function allowance(address owner, address spender)public view returns (uint256){
-        return allowed[owner][spender];
-    }
-    
-    
-    // Internal function that mints an amount of the token and assigns it to an account.
-    function mint(address receiver, uint amount) internal{
-        require(account != 0);
-        require(hasRole(MINTER_ROLE, msg.sender), "Caller is not a minter");
-        totalSupply = totalSupply.add(amount);
-        balances[receiver] = balances[receiver].add(amount);
-        
-        emit Transfer(address(0), receiver, amount);
-    }
-    
-    
-    // Internal function that burns an amount of the token of a given account.
-    function burn(address account, uint256 amount) internal {
-        require(account != 0);
-        require(amount <= balances[account]);
-        require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
+contract registerForLoyaltyProgram is UweseCoin {
+    address private owner;
 
-        totalSupply = totalSupply.sub(amount);
-        balances[account] = balances[account].sub(amount);
-        emit Transfer(account, address(0), amount);
-  }
-    
-    error insufficientBalance(uint requested, uint available);
-    
-    function send(address receiver, uint amount) public onlyBy(minter){
-        if(amount > balance[msg.sender])
-        revert insufficientBalance({
-            requested: amount,
-            available: balance[msg.sender]
-        });
-        
-        balance[msg.sender] -= amount;
-        balance[receiver] += amount;
-        
-        emit Sent(msg.sender, receiver, amount);
-    }
-    
-    
-    function withdrawFunds(uint amount) public onlyBy(minter) returns(bool success){
-        require(balance[msg.sender] >= amount);
-        balance[msg.sender] -= amount;
-        payable(msg.sender).transfer(amount);
-        return true;
-    } 
-    
-    function deleteCurrentMinter() public onlyBy(minter) onlyAfter(creationTime + 6 weeks){ 
-        delete minter;
+	constructor() public {
+		owner = msg.sender;
+	}
+	
+	
+	// Customer information
+	struct Customer{
+	    address customerAddress;
+	    string firstName;
+	    string lastName;
+	    string emailAddress;
+	    bool isRegistered;
+	    mapping(address => bool) business;
+	    
+	}
+	
+	
+	// business information
+	struct Business {
+        address busAddress;
+        string name;
+        string email;
+        bool isReg;
+        UweseCoin uwese; //crypto token of the business
+        mapping(address => bool) cust;//Check if customer is part of the loyalty program of the business
+        mapping(address => bool) bus;//Check if business has an arrangement with other businesses
+        mapping(address => uint256) rate;//Rate of exchange between the two crypto-tokens
+	}
+	
+	//each address is mapped to a specific customer or business
+	mapping(address => Customer) public customers;
+	mapping(address => Business) public businesses;
+	
+	   	/**
+     * @dev Registers a new business
+     * @param _bName  name of business
+     * @param _email email of business
+     * @param _bAd Address business
+     * @param _symbol of crypto token
+     * @param _decimal precision of token
+     */
 
-    }
-    
-    function forceMinterChange(address newMinter) public payable costs(200 ether){
-        minter = newMinter;
-        
-            // returns excess money to sender 
-        if(uint160 (minter) & 0 == 1){
-            return;
-        }
-    }
-    
-    
-    fallback () public payable {
-        revert();
-    }
+	function regBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol, uint8 _decimal, uint totalSupply) public {
+		require(msg.sender == owner);
+		require(!customers[_bAd].isReg, "Customer Registered");
+		require(!businesses[_bAd].isReg, "Business Registered");
+		uweseCoin uweseCoin = new uwese-coin(_bAd, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
+		businesses[_bAd] = Business(_bAd, _bName , _email, true, uweseCoin);//creates new business
+		businesses[_bAd].uweseCoin.mint(_bAd, 10000);//gives tokens for the business
+
+	}
+	
+		    /**
+     * @dev Registers a new customer
+     * @param _firstName first name of customer
+     * @param _lastName last name of customer
+     * @param _email email of customer
+     * @param _cAd address of customer
+     */
+  
+	function regCustomer(string memory _firstName, string memory _lastName, string memory _email, address _cAd) public {
+		require(msg.sender == owner);
+		require(!customers[_cAd].isReg, "Customer Registered");
+		require(!businesses[_cAd].isReg, "Business Registered");
+		customers[_cAd] = Customer(_cAd, _firstName, _lastName, _email, true);
+	}
+	
+	
+	/**
+     * @dev Customer joins business loyalty program
+     * @param _bAd address of business
+     */
+
+	function joinBusiness(address _bAd) public{
+		require(customers[msg.sender].isReg, "This is not a valid customer account");//customer only can call this function
+		require(businesses[_bAd].isReg, "This is not a valid business account");
+		businesses[_bAd].cus[msg.sender] = true;//putting customer in business's list and business in the customer's list.
+		customers[msg.sender].bus[_bAd] = true;
+	}
+	
+		/**
+     * @dev Connect two business to be able to exhange tokens between them. Both businesses must call this function and agree to an exchange rate for inter-business tractions to be carried out.
+     * @param _bAd address of business
+	* @param _rate rate of exchange
+     */
+
+	function connectBusiness(address _bAd, uint256 _rate) public{
+		require(businesses[_bAd].isReg, "This is not a valid business account");
+		require(businesses[msg.sender].isReg, "This is not a valid business account");
+		businesses[msg.sender].bs[_bAd] = true;
+		businesses[msg.sender].rate[_bAd] = _rate;
+	}
+	
+	/**
+     * @dev Redeem points. Points are transfered from the customer to the business. This function can only be invoked by a customer
+     * Emits an transfer event.
+     *@param from_bus Address of Business from whose crypto token is to be redeemed
+     *@param to_bus Address of Business to whom the tokens are being sent
+     * @param _points Points to be transfered
+     */
+
+
+	function spend(address from_bus, address to_bus, uint256 _points) public {
+		require(customers[msg.sender].isReg, "This is not a valid customer account");
+		require(businesses[from_bus].isReg, "This is not a valid business account");
+		require(businesses[to_bus].isReg, "This is not a valid business account");
+		if(from_bus==to_bus){
+			//transaction is with the same business
+			businesses[to_bus].lt.transferFrom(msg.sender, to_bus, _points);
+		}
+		else{
+			//requires both businesses to have agreed to the terms
+			require(businesses[from_bus].bs[to_bus], "This is not a valid linked business account");
+			require(businesses[to_bus].bs[from_bus], "This is not a valid linked business account");
+			uint256 _r = businesses[from_bus].rate[to_bus];
+			//burn from first account(customer) and mint into the reciever's businesses 
+			businesses[from_bus].uweseCoin.burnFrom(msg.sender, _points);
+			businesses[to_bus].uweseCoin.mint(to_bus, _r*_points);
+
+		}
+
+	}
+	
+	 /**
+     * @dev Credit points to a customers account. This function can only be invoked by a business
+     * Emits an transfer event.
+     * @param _points Points to be transfered
+     * @param _cAd Address of Customer
+     */
+
+	function reward(address _cAd, uint256 _points) public{
+		require(businesses[msg.sender].isReg, "This is not a valid business account");
+		require(customers[_cAd].isReg, "This is not a valid customer account");
+		require(businesses[msg.sender].cus[_cAd], "This customer has not joined your business" );
+		require(customers[_cAd].bus[msg.sender], "This customer has not joined your business" );
+		businesses[msg.sender].uweseCoin.transferFrom(msg.sender, _cAd, _points);
+	}
 }
