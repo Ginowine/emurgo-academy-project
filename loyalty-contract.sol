@@ -3,7 +3,7 @@ pragma solidity >= 0.7.0 < 0.9.0;
 import "./uwese-coin.sol";
 
 
-contract UweseLoyaltyProgram is UweseCoin {
+contract UweseLoyaltyContract is UweseCoin {
     
     address private owner;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -98,7 +98,7 @@ contract UweseLoyaltyProgram is UweseCoin {
 		require(businesses[to_bus].isReg, "This is not a valid business account");
 		if(from_bus==to_bus){
 			//transaction is with the same business
-			businesses[to_bus].lt.transferFrom(msg.sender, to_bus, _points);
+			businesses[to_bus].uweseCoin.transferFrom(msg.sender, to_bus, _points);
 		}
 		else{
 			//requires both businesses to have agreed to the terms
