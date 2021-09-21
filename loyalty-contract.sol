@@ -4,6 +4,7 @@ import "./uwese-coin.sol";
 
 
 contract UweseLoyaltyProgram is UweseCoin {
+    
     address private owner;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -68,10 +69,8 @@ contract UweseLoyaltyProgram is UweseCoin {
 	}
 	
 	
-	/**
-     * @dev Customer joins business loyalty program
-     * @param _bAd address of business
-     */
+     
+     // This function enables a customer to join a business of choice to be able to earn loyalty points
 
 	function joinBusiness(address _bAd) public{
 		require(customers[msg.sender].isReg, "This is not a valid customer account");//customer only can call this function
@@ -80,11 +79,8 @@ contract UweseLoyaltyProgram is UweseCoin {
 		customers[msg.sender].bus[_bAd] = true;
 	}
 	
-		/**
-     * @dev Connect two business to be able to exhange tokens between them. Both businesses must call this function and agree to an exchange rate for inter-business tractions to be carried out.
-     * @param _bAd address of business
-	* @param _rate rate of exchange
-     */
+     
+     // This function enables two businesses to go into an agreement and be able to exchange tokens. Both businesses must call this function and agree on an exchange rate for interbusiness transaction
 
 	function connectBusiness(address _bAd, uint256 _rate) public{
 		require(businesses[_bAd].isReg, "This is not a valid business account");
@@ -93,14 +89,8 @@ contract UweseLoyaltyProgram is UweseCoin {
 		businesses[msg.sender].rate[_bAd] = _rate;
 	}
 	
-	/**
-     * @dev Redeem points. Points are transfered from the customer to the business. This function can only be invoked by a customer
-     * Emits an transfer event.
-     *@param from_bus Address of Business from whose crypto token is to be redeemed
-     *@param to_bus Address of Business to whom the tokens are being sent
-     * @param _points Points to be transfered
-     */
 
+    // This function enables a customer to send earned points to businesses
 
 	function spend(address from_bus, address to_bus, uint256 _points) public {
 		require(customers[msg.sender].isReg, "This is not a valid customer account");
@@ -123,13 +113,8 @@ contract UweseLoyaltyProgram is UweseCoin {
 
 	}
 	
-	 /**
-     * @dev Credit points to a customers account. This function can only be invoked by a business
-     * Emits an transfer event.
-     * @param _points Points to be transfered
-     * @param _cAd Address of Customer
-     */
 
+    // This function is used by businesses to send points to customer account
 	function reward(address _cAd, uint256 _points) public{
 		require(businesses[msg.sender].isReg, "This is not a valid business account");
 		require(customers[_cAd].isReg, "This is not a valid customer account");
