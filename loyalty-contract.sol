@@ -7,10 +7,7 @@ import "./uwese-coin.sol";
 contract UweseLoyaltyContract{
     
     address private owner;
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-
-	constructor() public {
+	constructor() {
 		owner = msg.sender;
 	}
 	
@@ -35,7 +32,7 @@ contract UweseLoyaltyContract{
         string email;
         bool isReg;
         //crypto token of the business
-        MyToken uwese; 
+        UweseToken uwese; 
         //Check if customer is part of the loyalty program of the business
         mapping(address => bool) cust;
         //Check if business has an arrangement with other businesses
@@ -47,26 +44,36 @@ contract UweseLoyaltyContract{
 	//mapping an address to a customer and mapping an address to a Business
 	mapping(address => Customer) public customers;
 	mapping(address => Business) public businesses;
+	address numberOfBusinesses;
 	
 
     // This function registers a business to the loyalty platform and they are able to create their tokens
-	function regBusiness(bytes32 _minter, bytes32 _burner, string memory _bName, string memory _email, address _bAd, string memory _symbol, uint8 _decimal, uint totalSupply) public {
+	function regBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol,  uint totalSupply) public {
 		require(msg.sender == owner);
-		require(!customers[_bAd].isReg, "Customer Registered");
+		require(!customers[_bAd].isRegistered, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
-		MyToken uweseCoin = new MyToken(_minter, _burner, _bAd, _email, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
-		businesses[_bAd] = Business(_bAd, _bName , _email, true, uweseCoin);//creates new business
-		businesses[_bAd].uweseCoin.mint(_bAd, 10000);//gives tokens for the business
+		UweseToken uweseCoin = new UweseToken(totalSupply, _bAd, _bName, _symbol); //creates new crypto-token
 
+	    businesses[msg.sender].busAddress = _bAd;
+	    businesses[msg.sender].name = _bName;
+	    businesses[msg.sender].email = _email;
+	    businesses[msg.sender].isReg = true;
+	    businesses[msg.sender].uwese = uweseCoin;
+	
 	}
 	
     
     // This function registers a customer to the loyalty program
 	function regCustomer(string memory _firstName, string memory _lastName, string memory _email, address _cAd) public {
 		require(msg.sender == owner);
-		require(!customers[_cAd].isReg, "Customer Registered");
+		require(!customers[_cAd].isRegistered, "Customer Registered");
 		require(!businesses[_cAd].isReg, "Business Registered");
-		customers[_cAd] = Customer(_cAd, _firstName, _lastName, _email, true);
+		//customers[_cAd] = Customer(_cAd, _firstName, _lastName, _email, true);
+		customers[msg.sender].customerAddress = _cAd;
+		customers[msg.sender].firstName = _firstName;
+		customers[msg.sender].lastName = _lastName;
+		customers[msg.sender].emailAddress = _email;
+		customers[msg.sender].isRegistered = true;
 	}
 	
 	
@@ -94,7 +101,7 @@ contract UweseLoyaltyContract{
     // This function enables a customer to send earned points to businesses
 
 	function spend(address from_bus, address to_bus, uint256 _points) public {
-		require(customers[msg.sender].isReg, "This is not a valid customer account");
+		require(customers[msg.sender].isRegistered, "This is not a valid customer account");
 		require(businesses[from_bus].isReg, "This is not a valid business account");
 		require(businesses[to_bus].isReg, "This is not a valid business account");
 		if(from_bus==to_bus){
@@ -118,7 +125,7 @@ contract UweseLoyaltyContract{
     // This function is used by businesses to send points to customer account
 	function reward(address _cAd, uint256 _points) public{
 		require(businesses[msg.sender].isReg, "This is not a valid business account");
-		require(customers[_cAd].isReg, "This is not a valid customer account");
+		require(customers[_cAd].isRegistered, "This is not a valid customer account");
 		require(businesses[msg.sender].cus[_cAd], "This customer has not joined your business" );
 		require(customers[_cAd].bus[msg.sender], "This customer has not joined your business" );
 		businesses[msg.sender].uweseCoin.transferFrom(msg.sender, _cAd, _points);
