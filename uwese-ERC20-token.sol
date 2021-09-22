@@ -11,6 +11,8 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/ERC165.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/IERC165.sol";
 
+
+
 contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
     
     address private owner;
@@ -118,25 +120,26 @@ contract UweseCoin is IERC20, AccessControl, SafeMath, ERC20Mintable{
         emit Transfer(account, address(0), amount);
   }
     
-    error insufficientBalance(uint requested, uint available);
+    error InsufficientBalance (uint requested, uint available);
     
     function send(address receiver, uint amount) public onlyBy(minter){
-        if(amount > balance[msg.sender])
-        revert insufficientBalance({
+        if(amount > balances[msg.sender])
+            revert InsufficientBalance({
             requested: amount,
-            available: balance[msg.sender]
+            available: balances[msg.sender]
         });
         
-        balance[msg.sender] -= amount;
-        balance[receiver] += amount;
+        balances[msg.sender] -= amount;
+        balances[receiver] += amount;
         
         emit Sent(msg.sender, receiver, amount);
+
     }
     
     
     function withdrawFunds(uint amount) public onlyBy(minter) returns(bool success){
-        require(balance[msg.sender] >= amount);
-        balance[msg.sender] -= amount;
+        require(balances[msg.sender] >= amount);
+        balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
         return true;
     } 
