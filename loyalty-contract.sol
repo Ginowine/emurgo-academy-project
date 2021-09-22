@@ -11,6 +11,8 @@ contract UweseLoyaltyContract{
 		owner = msg.sender;
 	}
 	
+	UweseToken private uweseCoin;
+	
 	
 	// A struct complex data type holding Customer information
 	struct Customer{
@@ -52,7 +54,7 @@ contract UweseLoyaltyContract{
 		require(msg.sender == owner);
 		require(!customers[_bAd].isRegistered, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
-		UweseToken uweseCoin = new UweseToken(totalSupply, _bAd, _bName, _symbol); //creates new crypto-token
+		uweseCoin = new UweseToken(totalSupply, _bAd, _bName, _symbol); //creates new crypto-token
 
 	    businesses[msg.sender].busAddress = _bAd;
 	    businesses[msg.sender].name = _bName;
@@ -68,7 +70,7 @@ contract UweseLoyaltyContract{
 		require(msg.sender == owner);
 		require(!customers[_cAd].isRegistered, "Customer Registered");
 		require(!businesses[_cAd].isReg, "Business Registered");
-		//customers[_cAd] = Customer(_cAd, _firstName, _lastName, _email, true);
+
 		customers[msg.sender].customerAddress = _cAd;
 		customers[msg.sender].firstName = _firstName;
 		customers[msg.sender].lastName = _lastName;
@@ -81,10 +83,10 @@ contract UweseLoyaltyContract{
      // This function enables a customer to join a business of choice to be able to earn loyalty points
 
 	function joinBusiness(address _bAd) public{
-		require(customers[msg.sender].isReg, "This is not a valid customer account");//customer only can call this function
+		require(customers[msg.sender].isRegistered, "This is not a valid customer account");//customer only can call this function
 		require(businesses[_bAd].isReg, "This is not a valid business account");
-		businesses[_bAd].cus[msg.sender] = true;//putting customer in business's list and business in the customer's list.
-		customers[msg.sender].bus[_bAd] = true;
+		businesses[_bAd].cust[msg.sender] = true;//putting customer in business's list and business in the customer's list.
+		customers[msg.sender].business[_bAd] = true;
 	}
 	
      
@@ -93,7 +95,7 @@ contract UweseLoyaltyContract{
 	function connectBusiness(address _bAd, uint256 _rate) public{
 		require(businesses[_bAd].isReg, "This is not a valid business account");
 		require(businesses[msg.sender].isReg, "This is not a valid business account");
-		businesses[msg.sender].bs[_bAd] = true;
+		businesses[msg.sender].bus[_bAd] = true;
 		businesses[msg.sender].rate[_bAd] = _rate;
 	}
 	
@@ -106,15 +108,16 @@ contract UweseLoyaltyContract{
 		require(businesses[to_bus].isReg, "This is not a valid business account");
 		if(from_bus==to_bus){
 			//transaction is with the same business
-			businesses[to_bus].uweseCoin.transferFrom(msg.sender, to_bus, _points);
+			businesses[to_bus].uwese.transferFrom(msg.sender, to_bus, _points);
 		}
 		else{
 			//requires both businesses to have agreed to the terms
-			require(businesses[from_bus].bs[to_bus], "This is not a valid linked business account");
-			require(businesses[to_bus].bs[from_bus], "This is not a valid linked business account");
+			require(businesses[from_bus].bus[to_bus], "This is not a valid linked business account");
+			require(businesses[to_bus].bus[from_bus], "This is not a valid linked business account");
 			uint256 _r = businesses[from_bus].rate[to_bus];
 			//burn from first account(customer) and mint into the reciever's businesses 
-			businesses[from_bus].uweseCoin.burnFrom(msg.sender, _points);
+			
+			businesses[from_bus].UweseToken.burnFrom(msg.sender, _points);
 			businesses[to_bus].uweseCoin.mint(to_bus, _r*_points);
 
 		}
