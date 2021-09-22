@@ -3,7 +3,8 @@ pragma solidity >= 0.7.0 < 0.9.0;
 import "./uwese-coin.sol";
 
 
-contract UweseLoyaltyContract is UweseCoin {
+
+contract UweseLoyaltyContract{
     
     address private owner;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -34,7 +35,7 @@ contract UweseLoyaltyContract is UweseCoin {
         string email;
         bool isReg;
         //crypto token of the business
-        UweseCoin uwese; 
+        MyToken uwese; 
         //Check if customer is part of the loyalty program of the business
         mapping(address => bool) cust;
         //Check if business has an arrangement with other businesses
@@ -53,7 +54,7 @@ contract UweseLoyaltyContract is UweseCoin {
 		require(msg.sender == owner);
 		require(!customers[_bAd].isReg, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
-		UweseCoin uweseCoin = new UweseCoin(_minter, _burner, _bAd, _email, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
+		MyToken uweseCoin = new MyToken(_minter, _burner, _bAd, _email, _bName, _symbol, _decimal, totalSupply); //creates new crypto-token
 		businesses[_bAd] = Business(_bAd, _bName , _email, true, uweseCoin);//creates new business
 		businesses[_bAd].uweseCoin.mint(_bAd, 10000);//gives tokens for the business
 
