@@ -46,22 +46,37 @@ contract UweseLoyaltyContract{
 	//mapping an address to a customer and mapping an address to a Business
 	mapping(address => Customer) public customers;
 	mapping(address => Business) public businesses;
-	address numberOfBusinesses;
+	address[] public businessAccounts;
+	address[] public customerAccounts;
 	
 
     // This function registers a business to the loyalty platform and they are able to create their tokens
-	function regBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol,  uint totalSupply) public {
+	function registerBusiness(string memory _bName, string memory _email, address _bAd, string memory _symbol,  uint totalSupply) public {
 		require(msg.sender == owner);
 		require(!customers[_bAd].isRegistered, "Customer Registered");
 		require(!businesses[_bAd].isReg, "Business Registered");
 		uweseCoin = new UweseToken(totalSupply, _bAd, _bName, _symbol); //creates new crypto-token
-
-	    businesses[msg.sender].busAddress = _bAd;
-	    businesses[msg.sender].name = _bName;
-	    businesses[msg.sender].email = _email;
-	    businesses[msg.sender].isReg = true;
-	    businesses[msg.sender].uwese = uweseCoin;
+		
+		Business storage business = businesses[_bAd];
+		
+		business.busAddress = _bAd;
+		business.name = _bName;
+		business.email = _email;
+		business.isReg = true;
+		business.uwese = uweseCoin;
+		
+		businessAccounts.push(_bAd);
+		uint businessAccSize = businessAccounts.length -1;
 	
+	}
+	
+	function getBusinesses() view public returns(address[] memory){
+	    return businessAccounts;
+	}
+	
+	
+	function getBusiness(address busAdd) public view returns(string memory _bName, string memory _email, address _bAd, string memory _symbol,  uint totalSupply){
+	    
 	}
 	
     
