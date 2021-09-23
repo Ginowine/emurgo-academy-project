@@ -69,7 +69,7 @@ contract UweseLoyaltyContract{
 	
 	}
 	
-	// This function returns an array of registered businesses address
+	// This function returns an array of registered business addresses
 	function getListOfBusinesses() view public returns(address[] memory){
 	    return businessAccounts;
 	}
@@ -87,18 +87,37 @@ contract UweseLoyaltyContract{
 	
     
     // This function registers a customer to the loyalty program
-	function regCustomer(string memory _firstName, string memory _lastName, string memory _email, address _cAd) public {
+	function registerCustomer(string memory _firstName, string memory _lastName, string memory _email, address _cAd) public {
 		require(msg.sender == owner);
 		require(!customers[_cAd].isRegistered, "Customer Registered");
 		require(!businesses[_cAd].isReg, "Business Registered");
 
-		customers[msg.sender].customerAddress = _cAd;
-		customers[msg.sender].firstName = _firstName;
-		customers[msg.sender].lastName = _lastName;
-		customers[msg.sender].emailAddress = _email;
-		customers[msg.sender].isRegistered = true;
+        Customer storage customer = customers[_cAd];
+        
+        customer.customerAddress = _cAd;
+        customer.firstName = _firstName;
+        customer.lastName = _lastName;
+        customer.emailAddress = _email;
+        customer.isRegistered = true;
+        
+        customerAccounts.push(_cAd);
 	}
 	
+		// This function returns an array of registered customers addresses
+	function getListOfCustomers() view public returns(address[] memory){
+	    return customerAccounts;
+	}
+	
+	
+	// This function takes an argument of a customer address and then returns details about the particular address 
+	function getCustomerByAddress(address cusAddr) public view returns(string memory _fName, string memory lName, string memory _email, bool isReg){
+	    return(customers[cusAddr].firstName, customers[cusAddr].lastName, customers[cusAddr].emailAddress, customers[cusAddr].isRegistered);
+	}
+	
+	// This function returns the total number of custormers that are registered on the platform
+	function numberOfCustomers() view public returns (uint){
+	    return customerAccounts.length;
+	}
 	
      
      // This function enables a customer to join a business of choice to be able to earn loyalty points
