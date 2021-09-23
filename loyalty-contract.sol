@@ -66,17 +66,23 @@ contract UweseLoyaltyContract{
 		business.uwese = uweseCoin;
 		
 		businessAccounts.push(_bAd);
-		uint businessAccSize = businessAccounts.length -1;
 	
 	}
 	
-	function getBusinesses() view public returns(address[] memory){
+	// This function returns an array of registered businesses address
+	function getListOfBusinesses() view public returns(address[] memory){
 	    return businessAccounts;
 	}
 	
 	
-	function getBusiness(address busAdd) public view returns(string memory _bName, string memory _email, address _bAd, string memory _symbol,  uint totalSupply){
-	    
+	// This function takes an argument of a business address and then returns details about the particular address 
+	function getBusinessByAddress(address busAddr) public view returns(string memory _bName, string memory _email, UweseToken _uwese){
+	    return(businesses[busAddr].name, businesses[busAddr].email, businesses[busAddr].uwese);
+	}
+	
+	// This function returns the total number of bussinesses that are registered on the platform
+	function numberOfBusinesses() view public returns (uint){
+	    return businessAccounts.length;
 	}
 	
     
