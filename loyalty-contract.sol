@@ -7,11 +7,13 @@ import "./uwese-coin.sol";
 contract UweseLoyaltyContract{
     
     address private owner;
+	UweseToken private uweseCoin;
+	
+	
 	constructor() {
 		owner = msg.sender;
 	}
-	
-	UweseToken private uweseCoin;
+
 	
 	
 	// A struct complex data type holding Customer information
@@ -147,7 +149,7 @@ contract UweseLoyaltyContract{
 		require(businesses[from_bus].isReg, "This is not a valid business account");
 		require(businesses[to_bus].isReg, "This is not a valid business account");
 		if(from_bus==to_bus){
-			//transaction is with the same business
+			//transaction is with the same business 
 			businesses[to_bus].uwese.transferFrom(msg.sender, to_bus, _points);
 		}
 		else{
@@ -157,8 +159,8 @@ contract UweseLoyaltyContract{
 			uint256 _r = businesses[from_bus].rate[to_bus];
 			//burn from first account(customer) and mint into the reciever's businesses 
 			
-			businesses[from_bus].UweseToken.burnFrom(msg.sender, _points);
-			businesses[to_bus].uweseCoin.mint(to_bus, _r*_points);
+			businesses[to_bus].uwese.burnFrom(msg.sender, _points);
+			businesses[to_bus].uwese.transferFrom(msg.sender, to_bus, _r*_points);
 
 		}
 
@@ -169,8 +171,8 @@ contract UweseLoyaltyContract{
 	function reward(address _cAd, uint256 _points) public{
 		require(businesses[msg.sender].isReg, "This is not a valid business account");
 		require(customers[_cAd].isRegistered, "This is not a valid customer account");
-		require(businesses[msg.sender].cus[_cAd], "This customer has not joined your business" );
-		require(customers[_cAd].bus[msg.sender], "This customer has not joined your business" );
-		businesses[msg.sender].uweseCoin.transferFrom(msg.sender, _cAd, _points);
+		require(businesses[msg.sender].cust[_cAd], "This customer has not joined your business" );
+		require(customers[_cAd].business[msg.sender], "This customer has not joined your business" );
+		businesses[msg.sender].uwese.transferFrom(msg.sender, _cAd, _points);
 	}
 }
